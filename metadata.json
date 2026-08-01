@@ -1,0 +1,6 @@
+{
+  "name": "MENTOR DOCKS",
+  "description": "AI-powered website design, UX audit, and performance analysis tool.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

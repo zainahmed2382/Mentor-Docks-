@@ -1,0 +1,83 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+@import "tailwindcss";
+
+@variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Space Grotesk", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+}
+
+@utility bg-mesh-grid {
+  background-image: linear-gradient(rgba(0, 0, 0, 0.02) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(0, 0, 0, 0.02) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* Global Smooth Scrolling & Custom Scrollbar System */
+html {
+  scroll-behavior: smooth;
+  scrollbar-width: thin;
+  scrollbar-color: #3B82F6 #1F2937;
+}
+
+/* Global Custom Scrollbar for WebKit (Chrome, Safari, Edge, Opera) */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #1F2937;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #3B82F6;
+  border-radius: 9999px;
+  border: 2px solid #1F2937;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #60A5FA;
+}
+
+::-webkit-scrollbar-thumb:active {
+  background: #2563EB;
+}
+
+::-webkit-scrollbar-corner {
+  background: #1F2937;
+}
+
+/* Custom thin scrollbar utility helper class for panels */
+.custom-thin-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #3B82F6 #1F2937;
+}
+
+.custom-thin-scrollbar::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.custom-thin-scrollbar::-webkit-scrollbar-track {
+  background: #1F2937;
+  border-radius: 9999px;
+}
+
+.custom-thin-scrollbar::-webkit-scrollbar-thumb {
+  background: #3B82F6;
+  border-radius: 9999px;
+  border: 2px solid #1F2937;
+}
+
+.custom-thin-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #60A5FA;
+}
+
+.custom-thin-scrollbar::-webkit-scrollbar-thumb:active {
+  background: #2563EB;
+}
+
