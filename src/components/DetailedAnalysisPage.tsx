@@ -201,53 +201,60 @@ export default function DetailedAnalysisPage({ activeScan }: DetailedAnalysisPag
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        {/* Left Side: Analyzer selection list */}
-        <div className="lg:col-span-4 flex flex-col gap-2 bg-white dark:bg-[#131520] p-4 border border-gray-200/80 dark:border-slate-800 rounded-[32px] shadow-sm">
-          <span className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest px-3 mb-2 block">
-            Select Crawler Engine
-          </span>
-          {analyzers.map((analyzer) => {
-            const Icon = analyzer.icon;
-            const isSelected = activeTab === analyzer.id;
-            const score = scan.metrics[analyzer.scoreKey];
-            return (
-              <button
-                key={analyzer.id}
-                onClick={() => setActiveTab(analyzer.id as AnalyzerTab)}
-                className={`flex items-center justify-between p-3.5 rounded-2xl border transition-all text-left cursor-pointer group ${
-                  isSelected
-                    ? "bg-indigo-600 border-indigo-600 text-white shadow-[0_8px_20px_rgba(79,70,229,0.15)]"
-                    : "bg-white dark:bg-[#0A0B10]/40 hover:bg-gray-50 dark:hover:bg-slate-800/40 border-gray-200 dark:border-slate-800 text-gray-700 dark:text-gray-300 hover:border-gray-300 dark:hover:border-slate-700"
-                }`}
-              >
-                <div className="flex items-center gap-3 min-w-0">
+      <div className="flex flex-col gap-8 w-full">
+        {/* Top Header Row: Select Crawler Engine */}
+        <div className="bg-white dark:bg-[#131520] p-5 md:p-6 border border-gray-200/80 dark:border-slate-800 rounded-[32px] shadow-sm flex flex-col gap-4">
+          <div className="flex items-center justify-between border-b border-gray-100 dark:border-slate-800/80 pb-3">
+            <h2 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest flex items-center gap-2">
+              <Sparkles className="h-4 w-4 text-indigo-500" />
+              Select Crawler Engine
+            </h2>
+            <span className="text-xs text-indigo-600 dark:text-indigo-400 font-bold bg-indigo-50 dark:bg-indigo-950/30 px-3 py-1 rounded-full border border-indigo-100 dark:border-indigo-900/40">
+              8 Autonomous Crawlers
+            </span>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3">
+            {analyzers.map((analyzer) => {
+              const Icon = analyzer.icon;
+              const isSelected = activeTab === analyzer.id;
+              const score = scan.metrics[analyzer.scoreKey];
+              return (
+                <button
+                  key={analyzer.id}
+                  onClick={() => setActiveTab(analyzer.id as AnalyzerTab)}
+                  className={`flex flex-col items-center justify-center p-3.5 rounded-2xl border transition-all cursor-pointer text-center group ${
+                    isSelected
+                      ? "bg-indigo-600 border-indigo-600 text-white shadow-[0_8px_20px_rgba(79,70,229,0.2)] scale-[1.02]"
+                      : "bg-white dark:bg-[#0A0B10]/40 hover:bg-gray-50 dark:hover:bg-slate-800/40 border-gray-200 dark:border-slate-800 text-gray-700 dark:text-gray-300 hover:border-gray-300 dark:hover:border-slate-700"
+                  }`}
+                >
                   <div
-                    className={`p-2 rounded-xl transition-colors shrink-0 ${
+                    className={`p-2 rounded-xl transition-colors mb-2 ${
                       isSelected ? "bg-white/20 text-white" : `${analyzer.bg} ${analyzer.color}`
                     }`}
                   >
                     <Icon className="h-4.5 w-4.5" />
                   </div>
-                  <span className={`text-xs md:text-sm font-bold truncate ${isSelected ? "text-white" : "text-[#1A1A1A] dark:text-slate-200"}`}>
+                  <span className={`text-xs font-bold leading-tight truncate w-full ${isSelected ? "text-white" : "text-[#1A1A1A] dark:text-slate-200"}`}>
                     {analyzer.label}
                   </span>
-                </div>
-                <div className="flex items-center gap-1 shrink-0 ml-2">
-                  <span className={`text-xs font-extrabold ${isSelected ? "text-white/90" : "text-indigo-600 dark:text-indigo-400"}`}>
-                    {score}
-                  </span>
-                  <span className={`text-[9px] font-bold ${isSelected ? "text-white/60" : "text-gray-400 dark:text-gray-500"}`}>
-                    /100
-                  </span>
-                </div>
-              </button>
-            );
-          })}
+                  <div className="flex items-center gap-0.5 mt-1.5">
+                    <span className={`text-xs font-extrabold ${isSelected ? "text-white/95" : "text-indigo-600 dark:text-indigo-400"}`}>
+                      {score}
+                    </span>
+                    <span className={`text-[9px] font-bold ${isSelected ? "text-white/60" : "text-gray-400 dark:text-gray-500"}`}>
+                      /100
+                    </span>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
         </div>
 
-        {/* Right Side: Detailed Dashboard for Selected Analyzer */}
-        <div className="lg:col-span-8 flex flex-col gap-6">
+        {/* Detailed Dashboard for Selected Analyzer */}
+        <div className="flex flex-col gap-6 w-full">
           {/* Active Header Card */}
           {selectedAnalyzer && (
             <motion.div

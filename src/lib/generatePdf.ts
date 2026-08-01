@@ -664,16 +664,23 @@ export async function downloadPdfReport(scan: WebsiteScan): Promise<void> {
         for (const p of scan.problems) {
           const sevColor = getSeverityColor(p.severity);
           const sevBg = getSeverityBg(p.severity);
+          const titleText = p.details?.friendlyTitle || p.title;
+          const problemText = p.details?.simpleProblem || p.description;
+          const locationText = p.details?.whereIsIssue || p.category;
+          const priorityVal = p.details?.priority || p.severity;
 
           const card = iframeDoc.createElement("div");
           card.className = "issue-card";
           card.style.borderLeft = `4px solid ${sevColor}`;
           card.innerHTML = `
             <div class="issue-header">
-              <div class="issue-title">${p.title}</div>
-              <div class="issue-sev" style="background:${sevBg};color:${sevColor};border:1px solid ${sevColor}40;">${p.severity}</div>
+              <div class="issue-title">${titleText}</div>
+              <div style="display:flex;gap:6px;align-items:center;">
+                <div class="issue-sev" style="background:${sevBg};color:${sevColor};border:1px solid ${sevColor}40;">📍 ${locationText}</div>
+                <div class="issue-sev" style="background:${sevBg};color:${sevColor};border:1px solid ${sevColor}40;">⭐ ${priorityVal}</div>
+              </div>
             </div>
-            <div class="issue-desc">${p.description}</div>
+            <div class="issue-desc"><strong>🔴 Problem:</strong> ${problemText}</div>
           `;
 
           currentContentArea!.appendChild(card);

@@ -312,6 +312,14 @@ export default function App() {
                   scanHistory={scanHistory}
                   onSelectHistoryScan={handleSelectHistoryScan}
                   onNavigateToLabs={() => setCurrentView("labs")}
+                  onNavigateToAnalyze={() => setCurrentView("analyze")}
+                  onScanAgain={() => {
+                    if (activeScan?.url) {
+                      handleStartScan(activeScan.url);
+                    } else {
+                      setCurrentView("analyze");
+                    }
+                  }}
                 />
               ) : (
                 <LockedView viewName="dashboard" onLoginClick={() => setIsAuthModalOpen(true)} />

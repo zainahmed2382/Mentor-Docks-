@@ -162,7 +162,7 @@ export async function runPageSpeedInsights(url: string, strategy: ScanStrategy =
           errorMessage = "PageSpeed Insights API key invalid or unauthorized.";
         }
 
-        console.warn(`[PageSpeed] Request failed: ${errorMessage} (${text.slice(0, 150)})`);
+        console.info(`[PageSpeed] Request response status: ${errorMessage}`);
 
         return {
           strategy,
@@ -199,7 +199,7 @@ export async function runPageSpeedInsights(url: string, strategy: ScanStrategy =
         ? "PageSpeed Insights API request timed out (25s limit). Applied local browser engine analysis."
         : err?.message || "PageSpeed Insights fetch failed.";
 
-      console.warn(`[PageSpeed] Exception during analysis: ${errorMessage}`);
+      console.info(`[PageSpeed] Analysis status: ${errorMessage}`);
 
       return {
         strategy,

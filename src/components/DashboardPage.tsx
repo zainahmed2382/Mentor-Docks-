@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { motion } from "motion/react";
 import { WebsiteScan, PLACEHOLDER_SCAN } from "../types";
 import {
@@ -11,10 +11,8 @@ import {
   Gauge,
   Globe,
   CheckCircle2,
-  AlertTriangle,
   ChevronRight,
   Sparkles,
-  Zap,
 } from "lucide-react";
 
 interface DashboardPageProps {
@@ -22,20 +20,26 @@ interface DashboardPageProps {
   scanHistory: WebsiteScan[];
   onSelectHistoryScan: (id: string) => void;
   onNavigateToLabs?: () => void;
+  onNavigateToAnalyze?: () => void;
+  onScanAgain?: () => void;
 }
 
-export default function DashboardPage({ activeScan, scanHistory, onSelectHistoryScan, onNavigateToLabs }: DashboardPageProps) {
+export default function DashboardPage({
+  activeScan,
+  scanHistory,
+  onSelectHistoryScan,
+  onNavigateToLabs,
+}: DashboardPageProps) {
   const scan = activeScan ?? PLACEHOLDER_SCAN;
   const metrics = scan.metrics ?? PLACEHOLDER_SCAN.metrics;
   const score = typeof scan.score === "number" ? scan.score : 0;
-  const problems = Array.isArray(scan.problems) ? scan.problems : [];
-  const recommendations = Array.isArray(scan.recommendations) ? scan.recommendations : [];
+
   // Setup SVG circular progress coordinates
   const radius = 45;
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference - (circumference * score) / 100;
 
-  // Render metric icons dynamically
+  // Metric icons mapping
   const getMetricIcon = (key: string) => {
     switch (key) {
       case "codeQuality":
@@ -59,7 +63,6 @@ export default function DashboardPage({ activeScan, scanHistory, onSelectHistory
     }
   };
 
-  // Convert key camel case to human title
   const getMetricLabel = (key: string) => {
     switch (key) {
       case "codeQuality":
@@ -80,33 +83,6 @@ export default function DashboardPage({ activeScan, scanHistory, onSelectHistory
         return "SEO";
       default:
         return key;
-    }
-  };
-
-  // Status colors for severity
-  // Status colors for severity
-  const getSeverityBadge = (severity: "critical" | "medium" | "minor") => {
-    switch (severity) {
-      case "critical":
-        return (
-          <span className="bg-rose-50 dark:bg-rose-950/20 text-rose-700 dark:text-rose-400 border border-rose-200/60 dark:border-rose-900/30 font-sans font-bold text-[10px] px-2.5 py-0.5 rounded-full uppercase tracking-wider">
-            Critical
-          </span>
-        );
-      case "medium":
-        return (
-          <span className="bg-amber-50 dark:bg-amber-950/20 text-amber-700 dark:text-amber-400 border border-amber-200/60 dark:border-amber-900/30 font-sans font-bold text-[10px] px-2.5 py-0.5 rounded-full uppercase tracking-wider">
-            Medium
-          </span>
-        );
-      case "minor":
-        return (
-          <span className="bg-sky-50 dark:bg-sky-950/20 text-sky-700 dark:text-sky-400 border border-sky-200/60 dark:border-sky-900/30 font-sans font-bold text-[10px] px-2.5 py-0.5 rounded-full uppercase tracking-wider">
-            Minor
-          </span>
-        );
-      default:
-        return null;
     }
   };
 
@@ -249,92 +225,6 @@ export default function DashboardPage({ activeScan, scanHistory, onSelectHistory
         </div>
       </section>
 
-      {/* Middle Section - Problems Found & AI Recommendations */}
-      <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Problems Found Panel */}
-        <div className="bg-white dark:bg-[#131520] rounded-[32px] p-6 md:p-8 border border-gray-200/80 dark:border-slate-800/80 flex flex-col gap-5 shadow-[0_8px_30px_rgb(0,0,0,0.01)]">
-          <div className="flex justify-between items-center border-b border-gray-100 dark:border-slate-800 pb-3">
-            <h2 className="font-display text-lg md:text-xl font-bold text-[#1A1A1A] dark:text-slate-200 tracking-tight flex items-center gap-2">
-              Problems Found
-            </h2>
-            <span className="bg-gray-50 dark:bg-slate-900 text-gray-700 dark:text-slate-300 border border-gray-200 dark:border-slate-800 font-sans font-bold text-xs px-3 py-1 rounded-full shadow-sm">
-              {problems.length} Issues
-            </span>
-          </div>
-
-          <div className="flex flex-col gap-4 max-h-[380px] overflow-y-auto pr-1">
-            {problems.map((problem) => (
-              <div
-                key={problem.id}
-                className="bg-gray-50/50 dark:bg-slate-900/30 border border-gray-100 dark:border-slate-800/80 rounded-[20px] p-4 flex gap-4 items-start hover:border-gray-200/80 dark:hover:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-800/40 transition-all"
-              >
-                <div className="p-2 bg-white dark:bg-slate-900 rounded-[12px] border border-gray-100 dark:border-slate-800 mt-0.5 shrink-0 shadow-sm">
-                  <AlertTriangle className="h-4.5 w-4.5 text-rose-500" />
-                </div>
-
-                <div className="flex-grow flex flex-col gap-1.5 min-w-0">
-                  <div className="flex justify-between items-start gap-3">
-                    <h4 className="font-sans font-bold text-sm text-[#1A1A1A] dark:text-slate-200 tracking-tight truncate leading-tight">
-                      {problem.title}
-                    </h4>
-                    {getSeverityBadge(problem.severity)}
-                  </div>
-                  <p className="font-sans text-xs text-gray-500 dark:text-gray-400 leading-relaxed pr-2">
-                    {problem.description}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* AI Recommendations Panel */}
-        <div className="bg-white dark:bg-[#131520] rounded-[32px] p-6 md:p-8 border border-indigo-100 dark:border-indigo-950/40 flex flex-col gap-5 shadow-[0_12px_40px_rgba(79,70,229,0.03)] relative overflow-hidden">
-          {/* Subtle glowing overlay */}
-          <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-50 dark:bg-indigo-950/10 rounded-full blur-3xl pointer-events-none"></div>
-
-          <div className="flex justify-between items-center border-b border-gray-100 dark:border-slate-800 pb-3 z-10">
-            <h2 className="font-display text-lg md:text-xl font-bold text-[#1A1A1A] dark:text-slate-200 tracking-tight flex items-center gap-2">
-              <Sparkles className="h-5 w-5 text-indigo-600 dark:text-indigo-400" /> AI Recommendations
-            </h2>
-          </div>
-
-          <div className="flex flex-col gap-4 max-h-[380px] overflow-y-auto pr-1 z-10">
-            {recommendations.map((rec) => (
-              <div
-                key={rec.id}
-                className="bg-white dark:bg-slate-900/60 border border-gray-200/80 dark:border-slate-800/80 hover:border-indigo-300 dark:hover:border-indigo-500 rounded-[20px] p-4 flex gap-4 items-center relative overflow-hidden group transition-all duration-300 shadow-[0_4px_15px_rgba(0,0,0,0.01)]"
-              >
-                {/* Visual marker */}
-                <div className="absolute left-0 top-0 bottom-0 w-1 bg-indigo-600"></div>
-
-                <div className="p-2 bg-indigo-50 dark:bg-indigo-950/30 rounded-full border border-indigo-100 dark:border-indigo-900/30 shrink-0">
-                  <Zap className="h-5 w-5 text-indigo-600 dark:text-indigo-400 shrink-0" />
-                </div>
-
-                <div className="flex-grow min-w-0">
-                  <h4 className="font-sans font-bold text-sm text-[#1A1A1A] dark:text-slate-200 tracking-tight truncate leading-tight">
-                    {rec.title}
-                  </h4>
-                  <p className="font-sans text-xs text-gray-500 dark:text-gray-400 leading-relaxed truncate mt-1">
-                    {rec.description}
-                  </p>
-                </div>
-
-                <div className="text-right shrink-0">
-                  <span className="font-display text-sm md:text-base font-bold text-indigo-600 dark:text-indigo-400 block leading-none">
-                    +{rec.pointsAdded}
-                  </span>
-                  <span className="font-sans text-[9px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest block mt-1">
-                    PTS
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* Bottom Section - History Table */}
       <section className="bg-white dark:bg-[#131520] rounded-[32px] p-6 md:p-8 border border-gray-200/80 dark:border-slate-800/80 shadow-[0_8px_30px_rgb(0,0,0,0.01)]">
         <div className="flex justify-between items-center border-b border-gray-100 dark:border-slate-800 pb-4 mb-4">
@@ -358,19 +248,19 @@ export default function DashboardPage({ activeScan, scanHistory, onSelectHistory
               </tr>
             </thead>
             <tbody className="font-sans text-xs md:text-sm text-[#1A1A1A] dark:text-slate-200">
-              {scanHistory.map((scan) => (
+              {scanHistory.map((hScan) => (
                 <tr
-                  key={scan.id}
-                  onClick={() => onSelectHistoryScan(scan.id)}
+                  key={hScan.id}
+                  onClick={() => onSelectHistoryScan(hScan.id)}
                   className={`border-b border-gray-100 dark:border-slate-800/60 hover:bg-gray-50/50 dark:hover:bg-slate-800/40 transition-colors cursor-pointer group ${
-                    scan.id === activeScan?.id ? "bg-indigo-50/30 dark:bg-indigo-950/20" : ""
+                    hScan.id === activeScan?.id ? "bg-indigo-50/30 dark:bg-indigo-950/20" : ""
                   }`}
                 >
-                  <td className="py-4 px-3 text-gray-500 dark:text-gray-400 font-medium whitespace-nowrap">{scan.date}</td>
+                  <td className="py-4 px-3 text-gray-500 dark:text-gray-400 font-medium whitespace-nowrap">{hScan.date}</td>
                   <td className="py-4 px-3 font-mono font-bold text-xs text-indigo-600 dark:text-indigo-400 whitespace-nowrap truncate max-w-[200px] md:max-w-xs">
-                    {scan.url}
+                    {hScan.url}
                   </td>
-                  <td className="py-4 px-3 font-display font-bold text-sm">{scan.score}/100</td>
+                  <td className="py-4 px-3 font-display font-bold text-sm">{hScan.score}/100</td>
                   <td className="py-4 px-3 whitespace-nowrap">
                     <span className="bg-emerald-50 dark:bg-emerald-950/20 text-emerald-700 dark:text-emerald-400 border border-emerald-200/60 dark:border-emerald-900/30 font-sans font-bold text-[9px] px-2.5 py-0.5 rounded-full uppercase tracking-wider shadow-sm">
                       Completed
@@ -390,3 +280,4 @@ export default function DashboardPage({ activeScan, scanHistory, onSelectHistory
     </div>
   );
 }
+
