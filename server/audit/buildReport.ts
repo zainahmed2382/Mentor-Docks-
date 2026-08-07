@@ -351,45 +351,96 @@ export function buildAuditReport(data: RawAuditData, options: AuditOptions = {})
     });
   }
 
+  if (!crawl.isAccessible) {
+    const metrics = {
+      codeQuality: 0,
+      uiUx: 0,
+      responsiveness: 0,
+      typography: 0,
+      colorTheme: 0,
+      accessibility: 0,
+      performance: 0,
+      seo: 0,
+    };
+    return {
+      score: 0,
+      healthMessage: "Website Unreachable",
+      metrics,
+      problems: problems.slice(0, 20),
+      recommendations: [],
+    };
+  }
+
   const psi = pageSpeed?.categories;
   const lhBrowser = browser?.lighthouse;
 
   const performance = clamp(
-    psi?.performance ||
-      lhBrowser?.performance ||
-      (crawl.responseTimeMs < 400 ? 85 : crawl.responseTimeMs < 800 ? 70 : 55)
+    typeof psi?.performance === "number" && psi.performance > 0
+      ? psi.performance
+      : typeof lhBrowser?.performance === "number" && lhBrowser.performance > 0
+      ? lhBrowser.performance
+      : crawl.responseTimeMs > 0
+      ? crawl.responseTimeMs < 300 ? 95 : crawl.responseTimeMs < 600 ? 80 : crawl.responseTimeMs < 1200 ? 60 : 35
+      : 0
   );
+
   const accessibility = clamp(
-    psi?.accessibility ||
-      lhBrowser?.accessibility ||
-      (html ? 55 + Math.round(((html.imagesWithAlt / Math.max(1, html.imageCount)) * 25) + (html.semanticTagsCount > 3 ? 10 : 0)) : 50)
+    typeof psi?.accessibility === "number" && psi.accessibility > 0
+      ? psi.accessibility
+      : typeof lhBrowser?.accessibility === "number" && lhBrowser.accessibility > 0
+      ? lhBrowser.accessibility
+      : html
+      ? Math.round(
+          (html.imageCount > 0 ? (html.imagesWithAlt / html.imageCount) * 50 : 50) +
+          (html.missingFormLabels === 0 ? 30 : 10) +
+          (html.semanticTagsCount > 2 ? 20 : 0)
+        )
+      : 0
   );
+
   const seo = clamp(
-    psi?.seo ||
-      lhBrowser?.seo ||
-      (html
-        ? 60 +
-          (html.metaDescription ? 10 : 0) +
-          (html.ogTagsCount > 0 ? 8 : 0) +
-          (html.headings.h1 === 1 ? 8 : 0)
-        : 50)
+    typeof psi?.seo === "number" && psi.seo > 0
+      ? psi.seo
+      : typeof lhBrowser?.seo === "number" && lhBrowser.seo > 0
+      ? lhBrowser.seo
+      : html
+      ? Math.round(
+          (html.metaDescription ? 35 : 0) +
+          (html.ogTagsCount > 0 ? 30 : 0) +
+          (html.headings.h1 === 1 ? 25 : html.headings.h1 > 1 ? 15 : 0) +
+          (html.hasViewport ? 10 : 0)
+        )
+      : 0
   );
+
+  const baseCodeQuality = typeof psi?.bestPractices === "number" && psi.bestPractices > 0
+    ? psi.bestPractices
+    : typeof lhBrowser?.bestPractices === "number" && lhBrowser.bestPractices > 0
+    ? lhBrowser.bestPractices
+    : 100;
+
   const codeQuality = clamp(
-    (psi?.bestPractices || lhBrowser?.bestPractices || 70) -
-      (html?.duplicateIds.length ? 8 : 0) -
-      (browser?.javascriptErrors.length ? 15 : 0)
+    baseCodeQuality -
+      (!crawl.httpsSupported ? 25 : 0) -
+      (crawl.security.missing.length * 5) -
+      (html?.duplicateIds.length ? 10 : 0) -
+      (browser?.javascriptErrors.length ? 20 : 0)
   );
+
   const responsiveness = clamp(
-    (html?.hasViewport ? 88 : 42) - (browser?.mobileOverflow ? 18 : 0)
+    (html?.hasViewport ? 90 : 25) - (browser?.mobileOverflow ? 25 : 0)
   );
+
   const typography = clamp(
-    70 +
-      (html && html.headings.h1 === 1 ? 12 : html && html.headings.h1 === 0 ? -15 : 0) +
-      (html && html.headings.total >= 3 ? 8 : 0)
+    80 +
+      (html && html.headings.h1 === 1 ? 15 : html && html.headings.h1 === 0 ? -25 : -10) +
+      (html && html.headings.total >= 3 ? 5 : -10)
   );
+
   const colorTheme = clamp(
-    78 - (browser?.contrastFailures.length ? browser.contrastFailures.length * 4 : 0)
+    95 - (browser?.contrastFailures.length ? Math.min(60, browser.contrastFailures.length * 8) : 0)
   );
+
   const uiUx = clamp((responsiveness + typography + colorTheme) / 3);
 
   const metrics = {
@@ -411,28 +462,17 @@ export function buildAuditReport(data: RawAuditData, options: AuditOptions = {})
       metrics.colorTheme +
       metrics.accessibility +
       metrics.performance +
-      metrics.seo) /
-      8
+      metrics.seo) / 8
   );
-
-  if (recommendations.length === 0) {
-    recommendations.push({
-      id: nextId("r"),
-      title: "Maintain performance budgets",
-      description: "Keep monitoring Core Web Vitals after each deploy using Lighthouse CI or PageSpeed Insights.",
-      pointsAdded: 5,
-      category: "performance",
-    });
-  }
 
   const healthMessage =
     score >= 90
-      ? "Excellent audit results. Core Web Vitals, accessibility, and SEO signals are strong."
+      ? "Excellent Website"
       : score >= 75
-      ? "Solid foundation with room to improve performance, contrast, or metadata."
+      ? "Good Overall Health"
       : score >= 55
-      ? "Several critical issues were detected. Address security headers, accessibility, and loading performance first."
-      : "Major issues found. Fix HTTPS, viewport, JavaScript errors, and Core Web Vitals before launch.";
+      ? "Needs Minor Improvements"
+      : "Needs Attention";
 
   return {
     score,

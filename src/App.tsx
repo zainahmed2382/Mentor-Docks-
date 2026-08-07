@@ -292,7 +292,7 @@ export default function App() {
             {currentView === "analyze" && (
               <LandingPage
                 onStartScan={handleStartScan}
-                initialUrl={activeScan ? activeScan.url : "https://stripe.com"}
+                initialUrl={activeScan ? activeScan.url : ""}
                 user={user}
                 scanHistory={scanHistory}
                 onSelectScan={(id) => {

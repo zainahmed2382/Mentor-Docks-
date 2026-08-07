@@ -180,9 +180,28 @@ export default function DashboardPage({
             </div>
           </div>
 
-          <p className="font-sans text-xs md:text-sm text-gray-600 dark:text-gray-300 mt-6 text-center max-w-[240px] leading-relaxed font-medium">
-            {scan.healthMessage}
-          </p>
+          {/* Short user-friendly status badge */}
+          <div className="mt-5">
+            <span
+              className={`px-3.5 py-1 rounded-full text-xs font-bold tracking-wide border shadow-xs ${
+                score >= 90
+                  ? "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800/80"
+                  : score >= 75
+                  ? "bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-400 border-indigo-200 dark:border-indigo-800/80"
+                  : score >= 55
+                  ? "bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-800/80"
+                  : "bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-400 border-rose-200 dark:border-rose-800/80"
+              }`}
+            >
+              {score >= 90
+                ? "Excellent Website"
+                : score >= 75
+                ? "Good Overall Health"
+                : score >= 55
+                ? "Needs Minor Improvements"
+                : "Needs Attention"}
+            </span>
+          </div>
         </div>
 
         {/* Breakdown Metric Sub-cards (Right 2 columns) */}

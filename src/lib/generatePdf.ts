@@ -666,6 +666,7 @@ export async function downloadPdfReport(scan: WebsiteScan): Promise<void> {
           const sevBg = getSeverityBg(p.severity);
           const titleText = p.details?.friendlyTitle || p.title;
           const problemText = p.details?.simpleProblem || p.description;
+          const fixText = p.details?.bestRecommendation || (p.details?.howToFixSteps?.length ? p.details.howToFixSteps.join(". ") : "Apply standard web optimizations.");
           const locationText = p.details?.whereIsIssue || p.category;
           const priorityVal = p.details?.priority || p.severity;
 
@@ -680,7 +681,8 @@ export async function downloadPdfReport(scan: WebsiteScan): Promise<void> {
                 <div class="issue-sev" style="background:${sevBg};color:${sevColor};border:1px solid ${sevColor}40;">⭐ ${priorityVal}</div>
               </div>
             </div>
-            <div class="issue-desc"><strong>🔴 Problem:</strong> ${problemText}</div>
+            <div class="issue-desc" style="margin-top:6px;font-size:12px;color:#1e293b;"><strong>🔴 Problem:</strong> ${problemText}</div>
+            <div class="issue-fix" style="margin-top:6px;font-size:11px;color:#15803d;background:#f0fdf4;padding:8px 10px;border-radius:6px;border:1px solid #bbf7d0;"><strong>✅ How to Fix It:</strong> ${fixText}</div>
           `;
 
           currentContentArea!.appendChild(card);

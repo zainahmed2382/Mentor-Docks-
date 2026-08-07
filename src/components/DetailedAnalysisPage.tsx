@@ -55,62 +55,65 @@ export default function DetailedAnalysisPage({ activeScan }: DetailedAnalysisPag
   ];
 
   const getAnalyzerAssertions = (tab: AnalyzerTab) => {
+    const hasProb = (keySubstring: string) =>
+      scan.problems.some((p) => p.id.toLowerCase().includes(keySubstring.toLowerCase()) || p.title.toLowerCase().includes(keySubstring.toLowerCase()));
+
     switch (tab) {
       case "ux":
         return [
-          { name: "Clear Call-to-Action (CTA) placements", status: true },
-          { name: "Consistent section-by-section spacing", status: scan.metrics.uiUx > 80 },
-          { name: "Logical reading hierarchy & visual anchors", status: true },
-          { name: "Clean layout navigation & scrollable menus", status: true },
+          { name: "Clear visual hierarchy and reading structure", status: scan.metrics.uiUx >= 70 },
+          { name: "Consistent layout spacing & section margins", status: scan.metrics.uiUx >= 80 },
+          { name: "Responsive interactive touch targets", status: !hasProb("mobile_overflow") },
+          { name: "High overall user experience index", status: scan.metrics.uiUx >= 85 },
         ];
       case "code":
         return [
-          { name: "Semantic HTML element layout (header, footer, nav)", status: scan.metrics.codeQuality > 80 },
-          { name: "Absence of inline CSS elements", status: true },
-          { name: "Console errors and script integrity", status: true },
-          { name: "Correct tag matching and closure validations", status: true },
+          { name: "HTTPS encryption enforced across domain", status: !hasProb("https") && !hasProb("unreachable") },
+          { name: "HTTP response security headers present", status: !hasProb("security_headers") },
+          { name: "Unique HTML element IDs (no duplicate IDs)", status: !hasProb("duplicate_ids") },
+          { name: "Clean JavaScript execution (no runtime errors)", status: !hasProb("js_errors") && !hasProb("console_errors") },
         ];
       case "responsive":
         return [
-          { name: "Standard mobile viewport tag declaration", status: scan.metrics.responsiveness > 50 },
-          { name: "Avoidance of horizontal overflow scrollbars", status: scan.metrics.responsiveness > 75 },
-          { name: "Proportional media resizing (fluid layout grids)", status: true },
-          { name: "Touch target action bounds size (min 44px)", status: true },
+          { name: "Standard mobile viewport tag declaration", status: !hasProb("viewport") },
+          { name: "No horizontal layout overflow on mobile screens", status: !hasProb("mobile_overflow") },
+          { name: "Responsive container fluidity score", status: scan.metrics.responsiveness >= 75 },
+          { name: "Mobile rendering compatibility", status: scan.metrics.responsiveness >= 85 },
         ];
       case "typography":
         return [
-          { name: "Unified typeface selection (max 3 fonts)", status: true },
-          { name: "Rhythmic and proportional heading sizes (H1-H6)", status: true },
-          { name: "Optimum text leading and tracking settings", status: true },
-          { name: "Readability contrast thresholds on copy texts", status: scan.metrics.typography > 80 },
+          { name: "Primary H1 heading present on page", status: !hasProb("h1_missing") },
+          { name: "Single primary H1 heading hierarchy", status: !hasProb("h1_multiple") },
+          { name: "Typographic legibility & readable contrast", status: scan.metrics.typography >= 75 },
+          { name: "Structured heading outline across page", status: scan.metrics.typography >= 85 },
         ];
       case "color":
         return [
-          { name: "Strict conformance to contrast limits (4.5:1 ratio)", status: scan.metrics.colorTheme > 80 },
-          { name: "Balanced and clean brand color hierarchy", status: true },
-          { name: "Visual highlighting on clickable links and inputs", status: true },
-          { name: "Aesthetic color gradients and accent consistency", status: true },
+          { name: "WCAG AA color contrast standards (min 4.5:1 ratio)", status: !hasProb("contrast") },
+          { name: "Accessible foreground text elements", status: scan.metrics.colorTheme >= 75 },
+          { name: "High color readability rating", status: scan.metrics.colorTheme >= 85 },
+          { name: "Visually distinct link and action contrast", status: scan.metrics.colorTheme >= 90 },
         ];
       case "accessibility":
         return [
-          { name: "Semantic HTML ARIA attributes and labels", status: scan.metrics.accessibility > 75 },
-          { name: "Descriptive alternative tags on image elements", status: scan.metrics.accessibility > 70 },
-          { name: "Logical keyboard tab-navigation alignments", status: true },
-          { name: "Assigned screen reader readable alerts and status", status: true },
+          { name: "Descriptive alt attributes on image tags", status: !hasProb("alt_text") },
+          { name: "Associated labels on all form input controls", status: !hasProb("missing_labels") },
+          { name: "Accessible document structure & ARIA tags", status: scan.metrics.accessibility >= 75 },
+          { name: "High screen reader accessibility rating", status: scan.metrics.accessibility >= 85 },
         ];
       case "performance":
         return [
-          { name: "First Contentful Paint (FCP) below 1.5 seconds", status: scan.metrics.performance > 80 },
-          { name: "Efficient asset payloads (raster WebP compression)", status: scan.metrics.performance > 70 },
-          { name: "Consolidated stylesheets and scripts delivery", status: true },
-          { name: "Edge CDN static elements caching enabled", status: scan.metrics.performance > 60 },
+          { name: "Fast server response time (TTFB under 800ms)", status: !hasProb("ttfb") },
+          { name: "Largest Contentful Paint (LCP under 2.5s)", status: !hasProb("lcp") },
+          { name: "Low Cumulative Layout Shift (CLS under 0.1)", status: !hasProb("cls") },
+          { name: "Fast Interaction to Next Paint (INP under 200ms)", status: !hasProb("inp") },
         ];
       case "seo":
         return [
-          { name: "Standard document description and title headers", status: true },
-          { name: "Social network meta assets index (OpenGraph tags)", status: scan.metrics.seo > 75 },
-          { name: "Clean document index crawlable layouts", status: true },
-          { name: "Robots.txt and Sitemap.xml availability indicators", status: true },
+          { name: "Meta description tag present for search snippets", status: !hasProb("meta_description") },
+          { name: "Open Graph metadata present for social sharing", status: !hasProb("og_tags") },
+          { name: "Primary H1 tag for search engine indexing", status: !hasProb("h1_missing") },
+          { name: "High overall SEO indexability rating", status: scan.metrics.seo >= 80 },
         ];
       default:
         return [];
